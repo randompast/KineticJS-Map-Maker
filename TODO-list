@@ -33,6 +33,7 @@ The list isn't in any particular order.
   a) Perhaps a radio button that lets you select through various presets
 
 8) Database
+  //perhaps to some public cloud database?
   a) Each time a user saves a map they could name it and upload it to a database for others to use
   b) Each time a player adds a new tile set, or other type of data
   
@@ -49,5 +50,10 @@ The list isn't in any particular order.
   b) Do the same for tilesets
     i) make sure to size the container based off of the dimensions of the largest width/height of the tilesets
 
-12) Figure out some plugins and such...
+12) Usable Controls
+  // make this stuff more intuitive!
+  a) Particularly, change drag and draw to mousedown+hover
+    i)edit via mapProps, mapProps.isMouseDown = true?
+
+13) Figure out some plugins and such...
   a) hope that people like it thus far

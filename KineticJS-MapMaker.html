@@ -6,7 +6,7 @@
     </script>
 
     <script> 
-        function loadImages(sources, callback){ //ident
+        function loadImages(sources, callback){ //Image loader, suggested my html5canvastutorials.com
             var images = {};
             var loadedImages = 0;
             var numImages = 0;
@@ -25,10 +25,10 @@
         }
 
         function paintbrush(brush, grid, tile,  mapProps)
-        {
+        {  //Store data to the brush.
           var tS = mapProps.tS;
           var top;
-            if (!mapProps.iso) top = tile.attrs.y/tS;  //diff   //******
+            if (!mapProps.iso) top = tile.attrs.y/tS;  
             if (mapProps.iso) top = tile.attrs.y/(tS/2);
           var bottom = top + brush.y;
           var left = tile.attrs.x/tS;
@@ -39,17 +39,17 @@
             for(var i=left; i<right; i++)
               {
                 if(mapProps.iso) idc = (j-top); //error correction
-                if(grid[j+idc] && grid[j+idc][i])  //diff   //****** (errors)
+                if(grid[j+idc] && grid[j+idc][i])  //prevent errors/breaking
                 {
                   if(mapProps.hoverdrawing)
                   {
-                    grid[j][i].attrs.srcx = brush[0][0][0];
+                    grid[j][i].attrs.srcx = brush[0][0][0]; //paint with top left brush coordinate
                     grid[j][i].attrs.srcy = brush[0][0][1];
                   }
                   else
                   {
-                    grid[j+idc][i].attrs.srcx = brush[j-top][i-left][0];  //diff   //******
-                    grid[j+idc][i].attrs.srcy = brush[j-top][i-left][1];  //diff  //******
+                    grid[j+idc][i].attrs.srcx = brush[j-top][i-left][0];  //cycle through the brush tiles
+                    grid[j+idc][i].attrs.srcy = brush[j-top][i-left][1];  
                   }
                 }
               }
@@ -57,10 +57,10 @@
 
 
         function makebrush(mapProps, brush, grid, tile, tS)
-        {//Identical
-          if(tile == undefined)
+        {//For displaying the brush
+          if(tile == undefined)  //for resizing with wasd
           {
-            var gridx = brush[0][0][0]/tS;
+            var gridx = brush[0][0][0]/tS; 
             var gridy = brush[0][0][1]/tS;
           }
           else
@@ -79,7 +79,7 @@
               }
         }
 
-        function palletOverlay(rect,brush,tS,overlayguide){//ident
+        function palletOverlay(rect,brush,tS,overlayguide){//resize the brush display
             rect.attrs.srcwidth = tS*(brush.x);
             rect.attrs.srcheight = tS*(brush.y);
             rect.attrs.width = tS*(brush.x);
@@ -89,21 +89,21 @@
             rect.rect.attrs.width = rect.attrs.width; 
             rect.rect.attrs.height = rect.attrs.height; 
 
-            overlayguide.draw();
+            overlayguide.draw(); //update the display
         }
 
-        function mapmaker(tS, tileSet, maplayer, mapProps){
+        function mapmaker(tS, tileSet, maplayer, mapProps){  //make a map layer
             var map = new Array();
             var rand = Math.floor(Math.random()*10);
-            console.log(mapProps.div);
-            for(var j=0; j<mapProps.mapsizey; j++)//opp (fine to skip)
+
+            for(var j=0; j<mapProps.mapsizey; j++)
             {
               map[j] = new Array();
               for(var i=0; i<mapProps.mapsizex; i++)
               {
                 map[j][i] = new Kinetic.QImage({  //This sprite was 3x4 tiles
                   x: tS*i,
-                  y: tS*j/mapProps.div, //tS*j/2 this is where it's at... //****** /2
+                  y: tS*j/mapProps.div, //tS*j/2 for isometric
                   image: tileSet,
                   width: tS,
                   height: tS,
@@ -120,7 +120,7 @@
         }
 
         function maplisteners(tS, mapProps, map, layer, maplayer,brush,brushsrcx, brushsrcy,overlayguide,rect){
-            for(var j=0; j<mapProps.mapsizey; j++)
+            for(var j=0; j<mapProps.mapsizey; j++) //add listeners
             {
               for(var i=0; i<mapProps.mapsizex; i++)
               {
@@ -143,23 +143,23 @@
                     maplayer.draw();
                     }
                   });
-                maplayer.add(map[layer][j][i]);
+                maplayer.add(map[layer][j][i]); 
               }
             }
         }
 
         function maplayerselctor(map, maplayer, mapProps){
-          for(var j=0; j<mapProps.mapsizey; j++)
+          for(var j=0; j<mapProps.mapsizey; j++) //use 1,2,... to select the layers
           {
             for(var i=0; i<mapProps.mapsizex; i++)
             {
-              map[j][i].moveToTop();
+              map[j][i].moveToTop(); //Move all of the kinetic.Image tiles to the top. (even transparent tiles)
             }
           }
-          maplayer.draw();
+          maplayer.draw(); //Display
         }
  
-        function initStage(images){
+        function initStage(images){ //Do everything
             var tileSet = images.tileSet5;
             var isISO = globalmapdata.isometric;
             console.log(isISO);
@@ -172,8 +172,8 @@
             var tilesetlayer = new Kinetic.Layer();
             var maplayer = new Kinetic.Layer();
             var overlayguide = new Kinetic.Layer();
-            var brushsrcx = 0;
-            var brushsrcy = 0;
+            var brushsrcx = 0; //probably should do something else
+            var brushsrcy = 0; //would need to change a few things
             var brush = [];
                 brush.size = 10; // max size
                 brush.x = 1; // current
@@ -182,7 +182,7 @@
                   brush[j] = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
                 }
 
-
+            //Create the brush display
             var rect = new Kinetic.QImage({
                 x: -500,
                 y: -500,
@@ -207,32 +207,33 @@
                 alpha: 0.2
             });
 
-            rect.listen(false);
+            rect.listen(false); //make it invisible to the mouse events
             rect.rect.listen(false);
 
             //Map (background, initial)
             var map = new Array();
             var mapProps = {};
-              mapProps.hoverdrawing = false;
-              mapProps.tS = tS;
+              mapProps.hoverdrawing = false; // currently changed by holding shift
+              mapProps.tS = tS; //tileSize 
               mapProps.mapsizex = mapsizex;
               mapProps.mapsizey = mapsizey;
               mapProps.iso = isISO;
               mapProps.mapspacing = mapspacing;
               if(mapProps.iso) mapProps.div=2;
               if(!mapProps.iso) mapProps.div=1;
-            map[0] = mapmaker(tS, tileSet, maplayer, mapProps);
+            map[0] = mapmaker(tS, tileSet, maplayer, mapProps); //make a layer
             map[1] = mapmaker(tS, tileSet, maplayer, mapProps);
-            maplisteners(tS, mapProps, map, 0, maplayer, brush, brushsrcx, brushsrcy, overlayguide, rect);
+            maplisteners(tS, mapProps, map, 0, maplayer, brush, brushsrcx, brushsrcy, overlayguide, rect); //add listeners and display layer
             maplisteners(tS, mapProps, map, 1, maplayer, brush, brushsrcx, brushsrcy, overlayguide, rect);
 
-            var tiles = new Array();//ident
+            //Construct Tile Set
+            var tiles = new Array();
             for(var j=0; j<tileSet.height/tS; j++)
             {
               tiles[j] = new Array();
               for(var i=0; i<tileSet.width/tS; i++)
               {
-                tiles[j][i] = new Kinetic.QImage({  //This sprite was 3x4 tiles
+                tiles[j][i] = new Kinetic.QImage({
                   x: tS*i + mapProps.mapsizex*mapProps.tS,
                   y: tS*j,
                   image: tileSet,
@@ -264,11 +265,11 @@
 
             overlayguide.add(rect);
             overlayguide.add(rect.rect);
-            stage.add(maplayer);  //only the order you add them to the stage determines which is on top
-            stage.add(tilesetlayer); //Tilemap
-            stage.add(overlayguide);
+            stage.add(maplayer); //various map layers
+            stage.add(tilesetlayer); //tileset
+            stage.add(overlayguide); //display brush
 
-            document.addEventListener('keydown', function (e) {
+            document.addEventListener('keydown', function (e) { //current keyboard controls
                 var keyCode = e.which;
                 if (keyCode == 38 || keyCode == 40 || keyCode == 32) e.preventDefault(); //disables page scrolling
                 if (keyCode == 107 || keyCode == 109)//+,- removed
@@ -299,7 +300,7 @@
                   if (keyCode == 50)//2
                     maplayerselctor(map[1], maplayer, mapProps);
                 }
-                makebrush(mapProps, brush, tiles, undefined, tS)
+                makebrush(mapProps, brush, tiles, undefined, tS) //update brush's display
             });
             document.addEventListener('keyup', function (e) {
                 var keyCode = e.which;
@@ -313,17 +314,19 @@
         var loadmapmaker = function(tilesetURL){
             var sources = {
                     //http://silveiraneto.net/tag/tileset/
-                tileSet1: "http://www.quantumfractal.info/kineticjs/tiletest/free_tileset_CC.png", //CC-By-SA
+                //tileSet1: "http://www.quantumfractal.info/kineticjs/tiletest/free_tileset_CC.png", //CC-By-SA
                     //http://opengameart.org/sites/default/files/grassland_tiles.png
-                tileSet2: "http://www.files.cruel-online.de/img/tiles/grassland_tiles.png",
-                tileSet3: "http://www.spriters-resource.com/pc_computer/warcraft2/summertiles.png",
-                tileSet4: "http://opengameart.org/sites/default/files/iso-64x64-outside.png",
+                //tileSet2: "http://www.files.cruel-online.de/img/tiles/grassland_tiles.png",
+                //tileSet3: "http://www.spriters-resource.com/pc_computer/warcraft2/summertiles.png",
+                //tileSet4: "http://opengameart.org/sites/default/files/iso-64x64-outside.png",
+
+                //User's map
                 tileSet5: tilesetURL
             };
             loadImages(sources, initStage);
         };
 
-        var loadinputformap = function(){
+        var loadinputformap = function(){ //grab data from the div and store it to a global variable for access later.
           globalmapdata.URL = document.getElementById("URL").value;
           globalmapdata.tS = document.getElementById("tS").value;
           globalmapdata.mapx = document.getElementById("mapx").value;
@@ -334,12 +337,12 @@
             globalmapdata.isometric = true;
           else
             globalmapdata.isometric = false;
-          document.getElementById('menu').style.display = "none";
+          document.getElementById('menu').style.display = "none"; //hide the menu
 
-          loadmapmaker(globalmapdata.URL);
+          loadmapmaker(globalmapdata.URL); //do init and make the map
         }
 
-        var globalmapdata = {};
+        var globalmapdata = {}; //make a global variable for easier data access
 
     </script>
 </head>

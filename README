@@ -1,0 +1,39 @@
+Options:
+
+Samples
+
+URLS:
+//Any Image can work, even a picture of someone's face.
+1) http://www.quantumfractal.info/kineticjs/tiletest/free_tileset_CC.png  //CC-By-SA
+                                                                       //http://silveiraneto.net/tag/tileset/
+2) http://opengameart.org/sites/default/files/grassland_tiles.png
+3) http://www.spriters-resource.com/pc_computer/warcraft2/summertiles.png //unsure of rights
+4) http://opengameart.org/sites/default/files/iso-64x64-outside.png //Neat iso file
+
+Tilesize: 
+//This is governs the size of the tile for the tileSet and the map.
+1-4) 32
+
+#Tiles-X:
+//This is the X length of the map
+
+#Tiles-Y:
+//This is the Y length of the map (vertical)
+
+Spacing:
+//This is the spacing between tiles.
+//The onle of the sample URLS that has a spacing is #3
+
+Isometric?: 
+//1,t,true all yield true
+//anything else yields false
+
+***************************************
+Controls
+***************************************
+
+Selection Rectangle - w,a,s,d to resize the rectangle to select a bigger portion of the sorce image.
+
+Layer Select - 1,2 (above qwerty) to flip between the available layers.
+
+Drag and draw - hold shift and mouse over to draw with the top left.

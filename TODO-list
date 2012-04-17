@@ -12,6 +12,7 @@ The list isn't in any particular order.
 
 2) Bucket Tool
   a) topdown / iso versions.
+    i) for iso, srcx: tS*(0+i%2+j%2-2*(i%2*j%2))
   b) possibly bucket several tiles (ex: 10x10 (3x3 trees) for a 30x30 grid)
 
 3) Attributes

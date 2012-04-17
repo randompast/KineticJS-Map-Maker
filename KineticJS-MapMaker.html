@@ -1,0 +1,360 @@
+<html>
+<head>
+    <script src="http://www.html5canvastutorials.com/libraries/kinetic-v3.9.3.js">
+    </script>
+    <script type="text/javascript" src="http://quantumfractal.info/kineticjs/kQuantumImage2.js">
+    </script>
+
+    <script> 
+        function loadImages(sources, callback){ //ident
+            var images = {};
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                numImages++;
+            }
+            for (var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function(){
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                images[src].src = sources[src];
+            }
+        }
+
+        function paintbrush(brush, grid, tile,  mapProps)
+        {
+          var tS = mapProps.tS;
+          var top;
+            if (!mapProps.iso) top = tile.attrs.y/tS;  //diff   //******
+            if (mapProps.iso) top = tile.attrs.y/(tS/2);
+          var bottom = top + brush.y;
+          var left = tile.attrs.x/tS;
+          var right = left + brush.x;
+          var idc = 0;//indexcorrecter
+
+          for(var j=top; j<bottom; j++)
+            for(var i=left; i<right; i++)
+              {
+                if(mapProps.iso) idc = (j-top); //error correction
+                if(grid[j+idc] && grid[j+idc][i])  //diff   //****** (errors)
+                {
+                  if(mapProps.hoverdrawing)
+                  {
+                    grid[j][i].attrs.srcx = brush[0][0][0];
+                    grid[j][i].attrs.srcy = brush[0][0][1];
+                  }
+                  else
+                  {
+                    grid[j+idc][i].attrs.srcx = brush[j-top][i-left][0];  //diff   //******
+                    grid[j+idc][i].attrs.srcy = brush[j-top][i-left][1];  //diff  //******
+                  }
+                }
+              }
+        }
+
+
+        function makebrush(mapProps, brush, grid, tile, tS)
+        {//Identical
+          if(tile == undefined)
+          {
+            var gridx = brush[0][0][0]/tS;
+            var gridy = brush[0][0][1]/tS;
+          }
+          else
+          {
+            var gridx = tile.attrs.x/tS - mapProps.mapsizex;
+            var gridy = tile.attrs.y/tS;
+          }
+
+          for(var j=0; j<brush.y; j++)
+            for(var i=0; i<brush.x; i++)
+              {
+                if(grid[j+gridy] && grid[j+gridy][i+gridx]){
+                  brush[j][i][0] = grid[j+gridy][i+gridx].attrs.srcx;
+                  brush[j][i][1] = grid[j+gridy][i+gridx].attrs.srcy;
+                }
+              }
+        }
+
+        function palletOverlay(rect,brush,tS,overlayguide){//ident
+            rect.attrs.srcwidth = tS*(brush.x);
+            rect.attrs.srcheight = tS*(brush.y);
+            rect.attrs.width = tS*(brush.x);
+            rect.attrs.height = tS*(brush.y);
+            rect.rect.attrs.x = rect.attrs.x; 
+            rect.rect.attrs.y = rect.attrs.y;
+            rect.rect.attrs.width = rect.attrs.width; 
+            rect.rect.attrs.height = rect.attrs.height; 
+
+            overlayguide.draw();
+        }
+
+        function mapmaker(tS, tileSet, maplayer, mapProps){
+            var map = new Array();
+            var rand = Math.floor(Math.random()*10);
+            console.log(mapProps.div);
+            for(var j=0; j<mapProps.mapsizey; j++)//opp (fine to skip)
+            {
+              map[j] = new Array();
+              for(var i=0; i<mapProps.mapsizex; i++)
+              {
+                map[j][i] = new Kinetic.QImage({  //This sprite was 3x4 tiles
+                  x: tS*i,
+                  y: tS*j/mapProps.div, //tS*j/2 this is where it's at... //****** /2
+                  image: tileSet,
+                  width: tS,
+                  height: tS,
+                  name: "image",
+                  srcx: tS*rand, //x source position
+                  srcy: tS*0, //y source position
+                  srcwidth: tS, //source width
+                  srcheight: tS, //source height
+                  //draggable: true
+              });
+              } 
+            }
+            return map;
+        }
+
+        function maplisteners(tS, mapProps, map, layer, maplayer,brush,brushsrcx, brushsrcy,overlayguide,rect){
+            for(var j=0; j<mapProps.mapsizey; j++)
+            {
+              for(var i=0; i<mapProps.mapsizex; i++)
+              {
+                map[layer][j][i].on("mousedown", function() {
+                  this.attrs.srcx = brushsrcx;
+                  this.attrs.srcy = brushsrcy;
+                  paintbrush(brush, map[layer], this, mapProps);
+                  maplayer.draw();
+                  });
+                map[layer][j][i].on("mouseover", function() {
+                  rect.attrs.x = this.attrs.x;
+                  rect.attrs.y = this.attrs.y;
+                  palletOverlay(rect,brush,tS,overlayguide);
+                  overlayguide.draw();
+                  if(mapProps.hoverdrawing == true)
+                    {
+                    this.attrs.srcx = brushsrcx;
+                    this.attrs.srcy = brushsrcy;
+                    paintbrush(brush, map[layer], this, mapProps);
+                    maplayer.draw();
+                    }
+                  });
+                maplayer.add(map[layer][j][i]);
+              }
+            }
+        }
+
+        function maplayerselctor(map, maplayer, mapProps){
+          for(var j=0; j<mapProps.mapsizey; j++)
+          {
+            for(var i=0; i<mapProps.mapsizex; i++)
+            {
+              map[j][i].moveToTop();
+            }
+          }
+          maplayer.draw();
+        }
+ 
+        function initStage(images){
+            var tileSet = images.tileSet5;
+            var isISO = globalmapdata.isometric;
+            console.log(isISO);
+            var tS = parseInt(globalmapdata.tS);
+            var mapsizex = parseInt(globalmapdata.mapx);
+            var mapsizey = parseInt(globalmapdata.mapy);
+            var mapspacing = parseInt(globalmapdata.mapspacing);
+
+            var stage = new Kinetic.Stage({container: 'container', width:mapsizex*tS+tileSet.height, height:tileSet.height});
+            var tilesetlayer = new Kinetic.Layer();
+            var maplayer = new Kinetic.Layer();
+            var overlayguide = new Kinetic.Layer();
+            var brushsrcx = 0;
+            var brushsrcy = 0;
+            var brush = [];
+                brush.size = 10; // max size
+                brush.x = 1; // current
+                brush.y = 1;
+                for(var j = 0; j<brush.size; j++){ // initialize to top left tile
+                  brush[j] = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
+                }
+
+
+            var rect = new Kinetic.QImage({
+                x: -500,
+                y: -500,
+                image: tileSet,
+                width: tS,
+                height: tS,
+                name: "image",
+                srcx: 0, //x source position
+                srcy: 0, //y source position
+                srcwidth: tS, //source width
+                srcheight: tS, //source height
+                alpha: 0.5
+            });
+            rect.rect = new Kinetic.Rect({
+                x: rect.attrs.x,
+                y: rect.attrs.y,
+                width: rect.attrs.width,
+                height: rect.attrs.width,
+                fill: "#00D2FF",
+                stroke: "black",
+                strokeWidth: 4,
+                alpha: 0.2
+            });
+
+            rect.listen(false);
+            rect.rect.listen(false);
+
+            //Map (background, initial)
+            var map = new Array();
+            var mapProps = {};
+              mapProps.hoverdrawing = false;
+              mapProps.tS = tS;
+              mapProps.mapsizex = mapsizex;
+              mapProps.mapsizey = mapsizey;
+              mapProps.iso = isISO;
+              mapProps.mapspacing = mapspacing;
+              if(mapProps.iso) mapProps.div=2;
+              if(!mapProps.iso) mapProps.div=1;
+            map[0] = mapmaker(tS, tileSet, maplayer, mapProps);
+            map[1] = mapmaker(tS, tileSet, maplayer, mapProps);
+            maplisteners(tS, mapProps, map, 0, maplayer, brush, brushsrcx, brushsrcy, overlayguide, rect);
+            maplisteners(tS, mapProps, map, 1, maplayer, brush, brushsrcx, brushsrcy, overlayguide, rect);
+
+            var tiles = new Array();//ident
+            for(var j=0; j<tileSet.height/tS; j++)
+            {
+              tiles[j] = new Array();
+              for(var i=0; i<tileSet.width/tS; i++)
+              {
+                tiles[j][i] = new Kinetic.QImage({  //This sprite was 3x4 tiles
+                  x: tS*i + mapProps.mapsizex*mapProps.tS,
+                  y: tS*j,
+                  image: tileSet,
+                  width: tS,
+                  height: tS,
+                  name: "image",
+                  srcx: tS*i + mapProps.mapspacing*i, //x source position
+                  srcy: tS*j + mapProps.mapspacing*j, //y source position
+                  srcwidth: tS, //source width
+                  srcheight: tS, //source height
+              });
+                tiles[j][i].on("mouseover", function() {
+                  rect.attrs.x = this.attrs.x;
+                  rect.attrs.y = this.attrs.y;
+                  palletOverlay(rect,brush,tS,overlayguide);
+                  overlayguide.draw();
+                  });
+
+                tiles[j][i].on("mousedown", function() {
+                  rect.attrs.srcx = this.attrs.srcx;
+                  rect.attrs.srcy = this.attrs.srcy;
+                  makebrush(mapProps, brush, tiles, this, tS)
+                  palletOverlay(rect,brush,tS,overlayguide);
+                  overlayguide.draw();
+                  });
+                tilesetlayer.add(tiles[j][i]);
+              } 
+            }
+
+            overlayguide.add(rect);
+            overlayguide.add(rect.rect);
+            stage.add(maplayer);  //only the order you add them to the stage determines which is on top
+            stage.add(tilesetlayer); //Tilemap
+            stage.add(overlayguide);
+
+            document.addEventListener('keydown', function (e) {
+                var keyCode = e.which;
+                if (keyCode == 38 || keyCode == 40 || keyCode == 32) e.preventDefault(); //disables page scrolling
+                if (keyCode == 107 || keyCode == 109)//+,- removed
+                {
+                  if (keyCode == 107) brushsize++;
+                  if (keyCode == 109) if(brushsize > 0) brushsize--;
+                  rect.attrs.width = tS*(2*brushsize+1);
+                  rect.attrs.height = tS*(2*brushsize+1);
+                  rect.attrs.centerOffset.x = tS*(2*brushsize+1)/2 - 16;
+                  rect.attrs.centerOffset.y = tS*(2*brushsize+1)/2 - 16;
+                  overlayguide.draw();
+                }
+                if (keyCode == 16) //shift
+                  mapProps.hoverdrawing = true;
+                if (keyCode == 87 || keyCode == 65 || keyCode == 83 || keyCode == 68) //wasd
+                {
+                  if (keyCode == 83) if(brush.y < brush.size) brush.y++;
+                  if (keyCode == 68) if(brush.x < brush.size) brush.x++;
+                  if (keyCode == 87) if(brush.y > 1) brush.y--;
+                  if (keyCode == 65) if(brush.x > 1) brush.x--;
+                  palletOverlay(rect,brush,tS,overlayguide);
+                  console.log(brush.y+", "+brush.x);
+                }
+                if (keyCode == 49 || keyCode == 50)//1,2
+                {
+                  if (keyCode == 49)//1
+                    maplayerselctor(map[0], maplayer, mapProps);
+                  if (keyCode == 50)//2
+                    maplayerselctor(map[1], maplayer, mapProps);
+                }
+                makebrush(mapProps, brush, tiles, undefined, tS)
+            });
+            document.addEventListener('keyup', function (e) {
+                var keyCode = e.which;
+                if (keyCode == 16)//shift
+                  mapProps.hoverdrawing = false;
+            });
+
+        }
+
+
+        var loadmapmaker = function(tilesetURL){
+            var sources = {
+                    //http://silveiraneto.net/tag/tileset/
+                tileSet1: "http://www.quantumfractal.info/kineticjs/tiletest/free_tileset_CC.png", //CC-By-SA
+                    //http://opengameart.org/sites/default/files/grassland_tiles.png
+                tileSet2: "http://www.files.cruel-online.de/img/tiles/grassland_tiles.png",
+                tileSet3: "http://www.spriters-resource.com/pc_computer/warcraft2/summertiles.png",
+                tileSet4: "http://opengameart.org/sites/default/files/iso-64x64-outside.png",
+                tileSet5: tilesetURL
+            };
+            loadImages(sources, initStage);
+        };
+
+        var loadinputformap = function(){
+          globalmapdata.URL = document.getElementById("URL").value;
+          globalmapdata.tS = document.getElementById("tS").value;
+          globalmapdata.mapx = document.getElementById("mapx").value;
+          globalmapdata.mapy = document.getElementById("mapy").value;
+          globalmapdata.mapspacing = document.getElementById("space").value;
+          var iso = document.getElementById("iso").value;
+          if(iso == "t" || iso == 1 || iso == "true")
+            globalmapdata.isometric = true;
+          else
+            globalmapdata.isometric = false;
+          document.getElementById('menu').style.display = "none";
+
+          loadmapmaker(globalmapdata.URL);
+        }
+
+        var globalmapdata = {};
+
+    </script>
+</head>
+<body>
+    <div onmousedown="return false;" id="container" style="z-index:1"></div>
+    <div id="menu" style="z-index:2; border-style: solid; border-width:1px;">
+      URL: <textarea rows='2' cols='30' id='URL'>http://www.files.cruel-online.de/img/tiles/grassland_tiles.png</textarea>
+      TileSize: <textarea rows='1' cols='3' id='tS'>32</textarea>
+      <br />
+      #Tiles-X: <textarea rows='1' cols='3' id='mapx'>30</textarea>
+      #Tiles-y: <textarea rows='1' cols='3' id='mapy'>30</textarea>
+      Spacing: <textarea rows='1' cols='3' id='space'>0</textarea>
+      Isometric?: <textarea rows='1' cols='2' id='iso'>1</textarea>
+      <div onclick="loadinputformap();" style="border-style: solid; border-width:1px;">Make Map</div>
+    </div>
+<?php include_once("../analyticstracking.php"); ?>
+</body>
+</html>

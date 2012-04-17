@@ -1,0 +1,53 @@
+This is a list of suggestions and brainstorms which have yet to be done.
+
+The list isn't in any particular order.
+
+1) Save function
+  //Save to a div?
+  a) tmx?
+  b) json
+  c) array -> row3, column5, y-coordinate = [2][4][1]
+    i) can easily stringify the array
+    ii) Might also contain z-indexes (may not need more than a handful of diff values)
+
+2) Bucket Tool
+  a) topdown / iso versions.
+  b) possibly bucket several tiles (ex: 10x10 (3x3 trees) for a 30x30 grid)
+
+3) Attributes
+  a) [2][4][2] = "My attribute"
+    i) This could be for mouse overs ex: "Read sign" 
+    ii) Or, it could store some other metadata.
+
+4) Logic Layer
+  a) Special small layer for collisions 5x5 for each 1 tile?
+
+5) Drawing Guide
+  a) The isometric mode is a bit tricky sometimes a gap can occur and it's hard to trace
+     A drawing guide which shows every other diamond tile as a rotated chess board would alleviate this
+
+6) Defaults
+  a) Start layers as empty?
+
+7) More options in beginning user page
+  a) Perhaps a radio button that lets you select through various presets
+
+8) Database
+  a) Each time a user saves a map they could name it and upload it to a database for others to use
+  b) Each time a player adds a new tile set, or other type of data
+  
+9) Load
+  a) Ability to load a map for continued editing.
+    i) global preset variable where you can copy paste previous map data
+
+10) Ability to use multile tilesets
+  a) possibly shift+(1,2,3,..)
+
+11) Hide Layers
+  a) Hide all other layers and show current H+(1,2,...)
+    i) will need to make sure to show layers when selecting normally
+  b) Do the same for tilesets
+    i) make sure to size the container based off of the dimensions of the largest width/height of the tilesets
+
+12) Figure out some plugins and such...
+  a) hope that people like it thus far

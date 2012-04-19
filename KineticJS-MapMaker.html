@@ -158,6 +158,22 @@
           }
           maplayer.draw(); //Display
         }
+        
+        function mapDataSaver(map, maplayer, mapProps){
+          var myMapData = [];
+          for(var j=0; j<mapProps.mapsizey; j++) //use 1,2,... to select the layers
+          {
+            myMapData[j] = new Array();
+            for(var i=0; i<mapProps.mapsizex; i++)
+            {
+              myMapData[j][i] = new Array();          
+              myMapData[j][i][0] = map[j][i].attrs.srcx;
+              myMapData[j][i][1] = map[j][i].attrs.srcx; 
+            }
+          }
+          
+          return myMapData;
+        }
  
         function initStage(images){ //Do everything
             var tileSet = images.tileSet5;
@@ -272,15 +288,10 @@
             document.addEventListener('keydown', function (e) { //current keyboard controls
                 var keyCode = e.which;
                 if (keyCode == 38 || keyCode == 40 || keyCode == 32) e.preventDefault(); //disables page scrolling
-                if (keyCode == 107 || keyCode == 109)//+,- removed
+                if (keyCode == 80)//+,- removed
                 {
-                  if (keyCode == 107) brushsize++;
-                  if (keyCode == 109) if(brushsize > 0) brushsize--;
-                  rect.attrs.width = tS*(2*brushsize+1);
-                  rect.attrs.height = tS*(2*brushsize+1);
-                  rect.attrs.centerOffset.x = tS*(2*brushsize+1)/2 - 16;
-                  rect.attrs.centerOffset.y = tS*(2*brushsize+1)/2 - 16;
-                  overlayguide.draw();
+                  var data = mapDataSaver(map[0], maplayer, mapProps); 
+                  console.log(JSON.stringify(data));
                 }
                 if (keyCode == 16) //shift
                   mapProps.hoverdrawing = true;

@@ -224,7 +224,7 @@ function mapDataSaver(map, mapLayer, mapProps) {
 
       myMapData[j][i] = [];
       myMapData[j][i][0] = map[j][i].attrs.srcx;
-      myMapData[j][i][1] = map[j][i].attrs.srcx; 
+      myMapData[j][i][1] = map[j][i].attrs.srcy; 
 
     }
   }

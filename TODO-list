@@ -5,6 +5,8 @@ The list isn't in any particular order.
 1) Save function
   //Save to a div?
   a) tmx?
+    i)https://github.com/bjorn/tiled/wiki/TMX-Map-Format
+    ii)https://github.com/funkaster/ChesterGL/blob/master/chesterGL/tmxBlock.js
   b) json
   c) array -> row3, column5, y-coordinate = [2][4][1]
     i) can easily stringify the array
